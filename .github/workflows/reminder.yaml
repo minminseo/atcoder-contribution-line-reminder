@@ -17,15 +17,13 @@ jobs:
         run: |
           DATE=$(date -u +"%Y-%m-%dT00:00:00Z")
           USERNAME="${{ github.repository_owner }}"
-          QUERY="{\"query\": \"query { repository(owner: \\\"$USERNAME\\\", name: \\\"$REPOSITORY_NAME\\\") { ref(qualifiedName: \\\"main\\\") { target { ... on Commit { history(since: \\\"$DATE\\\") { edges { node { additions, deletions, committedDate, messageHeadline, author { name } changedFiles { path } } } } } } } } }\"}"
-
+          QUERY="{\"query\": \"query { repository(owner: \\\"$USERNAME\\\", name: \\\"$REPOSITORY_NAME\\\") { ref(qualifiedName: \\\"main\\\") { target { ... on Commit { history(since: \\\"$DATE\\\") { edges { node { additions, deletions, committedDate, messageHeadline, author { name } changedFiles } } } } } } } }\"}"
           RESPONSE=$(curl -H "Authorization: bearer $GITHUB_TOKEN" -H "Content-Type: application/json" -d "$QUERY" https://api.github.com/graphql)
           echo "Response: $RESPONSE"
-          TOTAL_COUNT=$(echo $RESPONSE | jq "[.data.repository.ref.target.history.edges[].node.changedFiles[] | select(.path | startswith(\\\"$DIRECTORY\\\"))] | length")
+          TOTAL_COUNT=$(echo $RESPONSE | jq '[.data.repository.ref.target.history.edges[].node | select(.changedFiles > 0)] | length')
           
           echo "Total contributions in $DIRECTORY: $TOTAL_COUNT"
           echo "CONTRIBUTIONS_COUNT=$TOTAL_COUNT" >> $GITHUB_ENV
-
       - name: Send LINE Notification if No Contributions
         if: env.CONTRIBUTIONS_COUNT == '0'
         env:
