@@ -12,7 +12,7 @@ jobs:
       - name: Check for Contributions in Specific Directory
         id: check_contributions
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
           REPOSITORY_NAME: "Atcoder"
           DIRECTORY: "past"
         run: |
